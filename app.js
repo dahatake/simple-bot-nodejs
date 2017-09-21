@@ -83,7 +83,7 @@ const firstChoices = {
         title: 'やっぱりチャーハン',
         subtitle: 'カニチャーハン',
         text: '渋谷駅から徒歩5分。カウンター主体なので、1人でも入りやすい!',
-        imageURL: 'https://github.com/dahatake/simple-bot-nodejs/images/chahan.jpg',
+        imageURL: 'https://dahatake.github.io/simple-bot-nodejs/images/chahan.jpg',
         button: '予約する',
         url: 'https://tabelog.com/tokyo/A1303/A130301/13005407/'
     },
@@ -92,7 +92,7 @@ const firstChoices = {
         title: 'どのお店も安定した美味さ',
         subtitle: '五右衛門',
         text: '品川駅ハチ公口から徒歩1分くらい。の路地裏にひっそりある。',
-        imageURL: 'http://www.yomenya-goemon.com/images/img_170901autumn/reco_menu05_xl.jpg"',
+        imageURL: 'http://www.yomenya-goemon.com/images/img_170901autumn/reco_menu05_xl.jpg',
         button: '予約する',
         url: 'https://tabelog.com/tokyo/A1303/A130301/13012503/'
     },
