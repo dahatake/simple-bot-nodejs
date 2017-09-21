@@ -3,7 +3,16 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const confige = require('config');
+const Util = require('./Util');
+const util = new Util();
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+//=========================================================
+// Configuration
+//=========================================================
+// 1. All user message log to Azure ApplicationInsight
 let insightsClient;
 if (process.env.APP_INSIGHTS_KEY) {
     const appInsights = require("applicationinsights");
@@ -17,11 +26,6 @@ if (process.env.APP_INSIGHTS_KEY) {
     insightsClient = appInsights.getClient();
 }
 
-const Util = require('./Util');
-const util = new Util();
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 
 //=========================================================
 // Bot Setup
@@ -96,15 +100,19 @@ const firstChoices = {
         button: '予約する',
         url: 'https://tabelog.com/tokyo/A1303/A130301/13012503/'
     },
-    "画像の簡単な説明": {
+    "画像の説明文を作る": {
         value: 'imageRecognition'
     },
     "何の食べ物か見分ける": {
         value: 'imageClassificationByCustomVision'
-    },
-    "その他": {
-        value: 'others'
     }
+    /*,
+    "Others": {
+        
+                value: 'others'
+        
+            }
+*/
 };
 
 // default first dialog
@@ -160,6 +168,7 @@ bot.dialog('AskDialog', [
     }
 ]);
 
+// 
 /* bot.dialog('GetFreeText', [
     session => {
         builder.Prompts.text(session, "ご不明点を自由に入力してください。");
