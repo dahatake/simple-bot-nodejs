@@ -2,6 +2,7 @@ const builder = require('botbuilder');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const confige = require('config');
 
 let insightsClient;
 if (process.env.APP_INSIGHTS_KEY) {
@@ -70,33 +71,36 @@ bot.on('conversationUpdate', message => {
     if (message.membersAdded) {
         message.membersAdded.forEach(identity => {
             if (identity.id === message.address.bot.id) {
-                bot.beginDialog(message.address, 'Greeting');
+                bot.beginDialog(message.address, 'InitialConversation');
             }
         });
     }
 });
 
 const firstChoices = {
-    "いいランチのお店": {
-        value: 'lunch',
-        title: '行列のできるタイ料理屋',
-        subtitle: 'ランチセットがコスパ良し',
-        text: '品川駅から徒歩10分くらいのところにあるタイ料理屋。トムヤムクンヌードルがおすすめ。',
-        imageURL: 'https://sakkuru.github.io/simple-bot-nodejs/images/tom.jpg',
+    "ランチ": {
+        value: 'lunch01',
+        title: 'やっぱりチャーハン',
+        subtitle: 'カニチャーハン',
+        text: '渋谷駅から徒歩5分。カウンター主体なので、1人でも入りやすい!',
+        imageURL: 'https://github.com/dahatake/simple-bot-nodejs/images/chahan.jpg',
         button: '予約する',
-        url: 'http://example.com/'
+        url: 'https://tabelog.com/tokyo/A1303/A130301/13005407/'
     },
-    "飲めるところ": {
-        value: 'drink',
-        title: '落ち着いた雰囲気の個室居酒屋',
-        subtitle: 'なんでも美味しいが、特に焼き鳥がおすすめ',
-        text: '品川駅から徒歩5分くらいの路地裏にひっそりある。',
-        imageURL: 'https://sakkuru.github.io/simple-bot-nodejs/images/yaki.jpg',
+    "定番パスタ": {
+        value: 'lunch02',
+        title: 'どのお店も安定した美味さ',
+        subtitle: '五右衛門',
+        text: '品川駅ハチ公口から徒歩1分くらい。の路地裏にひっそりある。',
+        imageURL: 'http://www.yomenya-goemon.com/images/img_170901autumn/reco_menu05_xl.jpg"',
         button: '予約する',
-        url: 'http://example.com/'
+        url: 'https://tabelog.com/tokyo/A1303/A130301/13012503/'
     },
-    "画像認識": {
+    "画像の簡単な説明": {
         value: 'imageRecognition'
+    },
+    "何の食べ物か見分ける": {
+        value: 'imageClassificationByCustomVision'
     },
     "その他": {
         value: 'others'
@@ -106,19 +110,19 @@ const firstChoices = {
 // default first dialog
 bot.dialog('/', [
     session => {
-        session.send("こんにちは。");
-        session.beginDialog('Greeting');
+        session.send("こんにちは。\n私はBot初期型です。");
+        session.beginDialog('InitialConversation');
     }
 ]);
 
-bot.dialog('Greeting', [
+bot.dialog('InitialConversation', [
     session => {
-        session.send("ボットが自動でお答えします。");
-        session.beginDialog('FirstQuestion');
+        session.send("幾つかのお手伝いができます。\n\n会話を終了させたい場合は[exit]と入力ください。");
+        session.beginDialog('AskDialog');
     }
 ]);
 
-bot.dialog('FirstQuestion', [
+bot.dialog('AskDialog', [
     (session, results, next) => {
         builder.Prompts.choice(session, "何をお探しですか。", firstChoices, { listStyle: 3 });
     },
@@ -131,6 +135,9 @@ bot.dialog('FirstQuestion', [
             return;
         } else if (choice.value === 'imageRecognition') {
             session.beginDialog('ImageRecognition');
+            return;
+        } else if (choice.value === 'imageClassificationByCustomVision') {
+            session.beginDialog('ImageClassificationByCustomVision');
             return;
         }
 
@@ -153,9 +160,9 @@ bot.dialog('FirstQuestion', [
     }
 ]);
 
-bot.dialog('GetFreeText', [
+/* bot.dialog('GetFreeText', [
     session => {
-        builder.Prompts.text(session, "自由に入力してください。");
+        builder.Prompts.text(session, "ご不明点を自由に入力してください。");
     },
     (session, results) => {
         console.log(results.response);
@@ -165,10 +172,10 @@ bot.dialog('GetFreeText', [
         });
     }
 ]);
-
+ */
 bot.dialog('ImageRecognition', [
     session => {
-        builder.Prompts.attachment(session, '画像をアップロードしてください。（複数可）');
+        builder.Prompts.attachment(session, '画像をアップロードしてください（複数可）');
     },
     (session, results) => {
         const promises = [];
@@ -180,11 +187,39 @@ bot.dialog('ImageRecognition', [
 
         Promise.all(promises).then(imageDescs => {
             imageDescs.forEach(res => {
-                session.send(res.description.captions[0].text);
+                util.getTranslatorAuthToken().
+                then(auth =>{
+                    util.getTranslationResults(auth, res.description.captions[0].text).
+                    then( result => {
+                        session.send(result);
+                    })
+                });
             });
         });
     }
 ]);
+
+bot.dialog('ImageClassificationByCustomVision', [
+    session => {
+        builder.Prompts.attachment(session, '食べ物の画像をアップロードしてください（複数可）');
+    },
+    (session, results) => {
+        const promises = [];
+        results.response.forEach(content => {
+            if (content.contentType.match('image')) {
+                promises.push(util.getCustomVisionResults(content.contentUrl));
+            }
+        });
+
+        Promise.all(promises).then(imageDescs => {
+            imageDescs.forEach(res => {
+                session.send(res.Predictions[0].Tag + " : " + res.Predictions[0].Probability);
+            });
+        });
+
+    }
+]);
+
 
 bot.dialog('EndDialog', [
     session => {
@@ -195,9 +230,10 @@ bot.dialog('EndDialog', [
         if (results.response) {
             session.send('ありがとうございました。');
             session.endDialog();
+            session.beginDialog('AskDialog');
         } else {
             session.send('お役に立てず申し訳ありません。');
-            session.beginDialog('FirstQuestion');
+            session.beginDialog('AskDialog');
         }
     }
 ]);
@@ -218,7 +254,7 @@ bot.customAction({
 bot.dialog('Exit', [
     session => {
         session.endDialog("スタックを消去して終了します。");
-        session.beginDialog('FirstQuestion');
+        session.beginDialog('AskDialog');
     },
 ]).triggerAction({
     matches: /^exit$/i

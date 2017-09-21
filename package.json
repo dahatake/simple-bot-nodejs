@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sakkuru/simple-bot-nodejs.git"
+    "url": "git+https://github.com/dahatake/simple-bot-nodejs.git"
   },
   "author": "",
   "license": "ISC",
@@ -16,7 +16,10 @@
     "applicationinsights": "^0.21.0",
     "body-parser": "^1.17.2",
     "botbuilder": "^3.9.1",
-    "express": "^4.15.3"
+    "config": "^1.26.2",
+    "express": "^4.15.3",
+    "libxmljs": "^0.18.7",
+    "xml2js": "^0.4.19"
   },
   "devDependencies": {
     "@types/es6-promise": "0.0.33",
