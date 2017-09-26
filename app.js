@@ -10,24 +10,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 //=========================================================
-// Configuration
-//=========================================================
-// 1. All user message log to Azure ApplicationInsight
-let insightsClient;
-if (process.env.APP_INSIGHTS_KEY) {
-    const appInsights = require("applicationinsights");
-    appInsights.setup(process.env.APP_INSIGHTS_KEY)
-        .setAutoDependencyCorrelation(false)
-        .setAutoCollectRequests(true)
-        .setAutoCollectPerformance(true)
-        .setAutoCollectExceptions(true)
-        .setAutoCollectDependencies(true)
-        .start();
-    insightsClient = appInsights.getClient();
-}
-
-
-//=========================================================
 // Bot Setup
 //=========================================================
 
@@ -38,8 +20,8 @@ const server = app.listen(port, () => {
 
 // Create chat bot
 const connector = new builder.ChatConnector({
-    appId: process.env.MICROSOFT_APP_ID,
-    appPassword: process.env.MICROSOFT_APP_PASSWORD
+    appId:          process.env.MICROSOFT_APP_ID,
+    appPassword:    process.env.MICROSOFT_APP_PASSWORD
 });
 
 const bot = new builder.UniversalBot(connector);
@@ -52,9 +34,6 @@ app.all('/api/messages', (req, res, next) => {
 
         if (req.body.channelData) {
             console.log('channelData', req.body.channelData);
-            if (insightsClient) {
-                insightsClient.trackEvent('channelData', req.body.channelData);
-            }
         }
     }
     next();
@@ -119,16 +98,43 @@ const firstChoices = {
 bot.dialog('/', [
     session => {
         session.send("こんにちは。\n私はBot初期型です。");
-        session.beginDialog('InitialConversation');
+        session.beginDialog('firstConversation');
+        //        session.beginDialog('InitialConversation');
+    }]
+);
+
+bot.dialog('firstConversation', [
+    (session, result, next) => {
+        builder.Prompts.text(session, '幾つかのお手伝いができます。\n\n会話を終了させたい場合は[exit]と入力ください。');
+    },
+    (session, result, next) => {
+        session.dialogData.description = result.response;
+
+        var choices = ['high', 'normal', 'low'];
+        builder.Prompts.choice(session, 'どれくらいお急ぎですか??', choices, { listStyle: builder.ListStyle.button });
+    },
+    (session, result, next) => {
+        session.dialogData.severity = result.response.entity;
+
+        var messege = `${result.response.entity} ですね。\n\nどんな種類の事を探していますか? (食事, 観光スポット, ほか)?`;
+        builder.Prompts.text(session, messege);
+    },
+    (session, result, next) => {
+        session.dialogData.category = result.response;
+
+        var messege = `${result.response} ですね。\n\n 優先度: ${session.dialogData.severity}\n\n お探し内容] ${session.dialogData.category}\n\n上記にて承りました`;
+        builder.Prompts.text(session, messege);
+        session.endDialog();
     }
 ]);
 
 bot.dialog('InitialConversation', [
     session => {
-        session.send("幾つかのお手伝いができます。\n\n会話を終了させたい場合は[exit]と入力ください。");
+        session.send('今いらっしゃる付近についてお調べできます。\n\n会話を終了させたい場合は[exit]と入力ください。');
         session.beginDialog('AskDialog');
-    }
+            }
 ]);
+
 
 bot.dialog('AskDialog', [
     (session, results, next) => {
@@ -168,7 +174,7 @@ bot.dialog('AskDialog', [
     }
 ]);
 
-// 
+// For use LUIS
 /* bot.dialog('GetFreeText', [
     session => {
         builder.Prompts.text(session, "ご不明点を自由に入力してください。");
@@ -269,12 +275,14 @@ bot.dialog('Exit', [
     matches: /^exit$/i
 });
 
+/*
 // exit command
 bot.dialog('Any', [
     session => {
         session.endDialog("自由入力を受け付けました。");
-        session.beginDialog('FirstQuestion');
+        session.beginDialog('InitialConversation');
     },
 ]).triggerAction({
     matches: /^.*$/i
 });
+*/
