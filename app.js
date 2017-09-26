@@ -98,8 +98,8 @@ const firstChoices = {
 bot.dialog('/', [
     session => {
         session.send("こんにちは。\n私はBot初期型です。");
-        session.beginDialog('firstConversation');
-        //        session.beginDialog('InitialConversation');
+        //session.beginDialog('firstConversation');
+        session.beginDialog('InitialConversation');
     }]
 );
 
