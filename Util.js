@@ -1,57 +1,7 @@
 const request = require('request');
 
 class Util {
-    storeUserInput(text) {
-        const apiEndpoint = process.env.LOG_ENDPOINT;
-        if (!apiEndpoint) return;
 
-        const body = {
-            input: text,
-        }
-        const options = {
-            url: apiEndpoint,
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body),
-        };
-        request.post(options, (error, response, body) => {
-            if (error) {
-                console.log('Logging Error: ', error);
-            } else {
-                console.log(body);
-            }
-        });
-    };
-
-/*     getLuis(text) {
-        return new Promise((resolve, reject) => {
-            const apiEndpoint = process.env.LUIS_ENDPOINT || 'https://southeastasia.api.cognitive.microsoft.com/luis/v2.0';
-
-            const params = {
-                'subscription-key': process.env.SUBSCRIOTION_KEY,
-                'timezoneOffset': 540,
-                'verbose': true,
-                q: text
-            };
-
-            const options = {
-                url: apiEndpoint,
-                headers: {
-                    'Accept': 'application/json',
-                },
-                qs: params
-            };
-
-            request.get(options, (err, response, body) => {
-                if (err) { console.log(err); return; }
-                const res = JSON.parse(response.body);
-                resolve(res);
-            });
-        });
-    }
- */
     getCognitiveResults(imageURL) {
         return new Promise((resolve, reject) => {
             const apiEndpoint = process.env.COMPUTER_VISION_ENDPOINT || 'https://southeastasia.api.cognitive.microsoft.com/vision/v1.0/analyze';
@@ -172,6 +122,35 @@ class Util {
             });
         });
     };
+
+    /*     getLuis(text) {
+        return new Promise((resolve, reject) => {
+            const apiEndpoint = process.env.LUIS_ENDPOINT || 'https://southeastasia.api.cognitive.microsoft.com/luis/v2.0';
+
+            const params = {
+                'subscription-key': process.env.SUBSCRIOTION_KEY,
+                'timezoneOffset': 540,
+                'verbose': true,
+                q: text
+            };
+
+            const options = {
+                url: apiEndpoint,
+                headers: {
+                    'Accept': 'application/json',
+                },
+                qs: params
+            };
+
+            request.get(options, (err, response, body) => {
+                if (err) { console.log(err); return; }
+                const res = JSON.parse(response.body);
+                resolve(res);
+            });
+        });
+    }
+ */
+
 }
 
 module.exports = Util;

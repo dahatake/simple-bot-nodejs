@@ -29,7 +29,6 @@ const bot = new builder.UniversalBot(connector);
 // for getting all user input
 app.all('/api/messages', (req, res, next) => {
     if (req.body.type === 'message' && req.body.text) {
-        util.storeUserInput(req.body);
         console.log('message', req.body);
 
         if (req.body.channelData) {
