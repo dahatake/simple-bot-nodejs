@@ -7,7 +7,7 @@ class Util {
             const apiEndpoint = process.env.COMPUTER_VISION_ENDPOINT || 'https://southeastasia.api.cognitive.microsoft.com/vision/v1.0/analyze';
 
             const params = {
-                'subscription-key': process.env.COMPUTER_VISION_SUBSCRIPTION_KEY || '387cf4661f90475d8c3ed1ac68b21bfd',
+                'subscription-key': process.env.COMPUTER_VISION_SUBSCRIPTION_KEY || '<<Your Key>>',
                 'visualFeatures': 'Description',
             };
 
@@ -38,7 +38,7 @@ class Util {
             const apiEndpoint = process.env.CUSTOM_VISION_ENDPOINT || 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.0/Prediction/399b3eaa-1863-439d-9ab6-580eaa720ab9/image';
 
             const params = {
-                'Prediction-Key': process.env.CUSTOM_VISION_SUBSCRIPTION_KEY || '018e195c10dd430f87a38bdba7cb0c44'
+                'Prediction-Key': process.env.CUSTOM_VISION_SUBSCRIPTION_KEY || '<<Your Key>>'
             };
 
             const options = {
@@ -68,7 +68,7 @@ class Util {
             var apiEndpoint = 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken';
 
             const params = {
-                'Subscription-Key': process.env.TRANSLATOR_KEY || 'baedf3aeaee74af4b54468179b160bd1'
+                'Subscription-Key': process.env.TRANSLATOR_KEY || '<<Your Key>>'
             };
 
             const options = {
